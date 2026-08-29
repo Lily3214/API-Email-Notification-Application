@@ -14,3 +14,5 @@ Automated a previously manual monitoring/notification process.
 | **Implementation** | API client, JSON processing, mapping logic, validation/business rules, SAP integration, SMTP notifications, and logging/error handling |
 | **Result** | Automated daily scrap-data processing and provided business users with a scheduled email notification every morning at 9:00 AM. |
 | **Skills** | C#, .NET, REST API Integration, ERP Integration, Data Transformation, Automation, Troubleshooting |
+
+<img width="875" height="1016" alt="image" src="https://github.com/user-attachments/assets/e245266d-c934-45c5-98a8-b973574bf3b1" />
