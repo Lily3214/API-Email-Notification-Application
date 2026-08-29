@@ -15,4 +15,16 @@ Automated a previously manual monitoring/notification process.
 | **Result** | Automated daily scrap-data processing and provided business users with a scheduled email notification every morning at 9:00 AM. |
 | **Skills** | C#, .NET, REST API Integration, ERP Integration, Data Transformation, Automation, Troubleshooting |
 
+Each Class have one responsibility:
+| File | Responsibility |
+|---|---|
+| **WeatherApiClient.cs** | Communicate with Open-Meteo using HttpClient |
+| **WeatherResponse.cs** | Represent/deserializes API JSON |
+| **WeatherService.cs** | Coordinate obtaining weather information |
+| **AlertService.cs** | Decide whether weather conditions require an alert |
+| **EmailService.cs** | Build and send email notifications |
+| **AlertSettings.cs** | Store configurable thresholds |
+| **appsettings.json** | Configuration values |
+| **Program.cs** | Dependency injection and application startup |
+
 <img width="875" height="1016" alt="image" src="https://github.com/user-attachments/assets/e245266d-c934-45c5-98a8-b973574bf3b1" />
