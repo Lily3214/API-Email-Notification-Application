@@ -28,3 +28,7 @@ Each Class have one responsibility:
 | **Program.cs** | Dependency injection and application startup |
 
 <img width="875" height="1016" alt="image" src="https://github.com/user-attachments/assets/e245266d-c934-45c5-98a8-b973574bf3b1" />
+
+<img width="1233" height="1291" alt="image" src="https://github.com/user-attachments/assets/26425129-4efa-49af-b096-801c3230c306" />
+
+<img width="1231" height="1292" alt="image" src="https://github.com/user-attachments/assets/8ffe472b-a7bb-4fcc-88e3-db240c2effa9" />
