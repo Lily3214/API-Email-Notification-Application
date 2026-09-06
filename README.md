@@ -18,7 +18,7 @@ Automated a previously manual monitoring/notification process.
 Each Class have one responsibility:
 | File | Responsibility |
 |---|---|
-| **WeatherApiClient.cs** | Communicate with Open-Meteo using HttpClient |
+| **Api/WeatherApiClient.cs** | Communicate with Open-Meteo using HttpClient |
 | **WeatherResponse.cs** | Represent/deserializes API JSON |
 | **WeatherService.cs** | Coordinate obtaining weather information |
 | **AlertService.cs** | Decide whether weather conditions require an alert |
