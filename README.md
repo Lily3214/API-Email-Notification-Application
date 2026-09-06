@@ -18,14 +18,18 @@ Automated a previously manual monitoring/notification process.
 Each Class have one responsibility:
 | File | Responsibility |
 |---|---|
-| **Api/WeatherApiClient.cs** | Communicate with Open-Meteo using HttpClient |
-| **WeatherResponse.cs** | Represent/deserializes API JSON |
-| **WeatherService.cs** | Coordinate obtaining weather information |
-| **AlertService.cs** | Decide whether weather conditions require an alert |
-| **EmailService.cs** | Build and send email notifications |
-| **AlertSettings.cs** | Store configurable thresholds |
-| **appsettings.json** | Configuration values |
-| **Program.cs** | Dependency injection and application startup |
+| **Api/WeatherApiClient.cs** | Communicates with the Open-Meteo API using HttpClient and deserializes the API response |
+| **Models/WeatherResponse.cs** | Represents the weather data returned by the Open-Meteo API |
+| **Models/AlertResult.cs** | Represents the result of evaluating weather conditions, including whether an alert was triggered and the alert message |
+| **Services/WeatherService.cs** | Coordinates retrieving weather information through WeatherApiClient |
+| **Services/AlertService.cs** | Applies business rules to determine whether temperature or wind conditions require an alert |
+| **Services/EmailService.cs** | Sends email notifications through SMTP/Mailtrap |
+| **Templates/EmailTemplate.cs** | Builds the HTML content used for weather-alert emails |
+| **Configuration/AlertSettings.cs** | Defines configurable temperature and wind-speed alert thresholds |
+| **Configuration/SmtpSettings.cs** | Defines SMTP configuration such as host, port, username, sender address, and credentials |
+| **appsettings.json** | Stores non-secret application configuration such as alert thresholds and SMTP settings |
+| **Properties/launchSettings.json** | Defines local development launch settings, such as the application URL and Swagger launch page |
+| **Program.cs** | Configures dependency injection, middleware, Swagger, application services, and API endpoints |
 
 <img width="875" height="1016" alt="image" src="https://github.com/user-attachments/assets/e245266d-c934-45c5-98a8-b973574bf3b1" />
 
