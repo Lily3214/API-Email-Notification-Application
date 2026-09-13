@@ -42,5 +42,6 @@ Each Class have one responsibility:
 **Database Result**
 
 The screenshot below demonstrates weather data retrieved from the API and successfully loaded to SQL Server.
-<img width="2534" height="912" alt="image" src="https://github.com/user-attachments/assets/c062ff7a-04d7-4752-92c2-4ca71b5c0700" />
+<img width="1809" height="930" alt="image" src="https://github.com/user-attachments/assets/c06bc1eb-0c59-40ac-a45c-3d7536ce2a3e" />
+
 
