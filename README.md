@@ -48,3 +48,15 @@ The screenshot below demonstrates weather data retrieved from the API and succes
 <img width="1809" height="930" alt="image" src="https://github.com/user-attachments/assets/c06bc1eb-0c59-40ac-a45c-3d7536ce2a3e" />
 
 
+## 🎥 Application Demo
+
+This video demonstrates the complete application workflow:
+
+- REST API integration with Open-Meteo
+- Weather data retrieval and JSON deserialization
+- SQL Server data persistence
+- Configurable weather alert business logic
+- SMTP email notification
+- Application logging
+
+[▶ Watch the WeatherAlertService Demo] https://www.youtube.com/watch?v=Ydo4EGIp-dY
