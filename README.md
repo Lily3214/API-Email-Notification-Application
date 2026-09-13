@@ -38,7 +38,8 @@ Each Class have one responsibility:
 <img width="1233" height="1291" alt="image" src="https://github.com/user-attachments/assets/26425129-4efa-49af-b096-801c3230c306" />
 
 <img width="1231" height="1292" alt="image" src="https://github.com/user-attachments/assets/8ffe472b-a7bb-4fcc-88e3-db240c2effa9" />
-**API-Email-Notification-Application Email Notification Received**
+
+**Email Notification Received**
 <img width="980" height="657" alt="image" src="https://github.com/user-attachments/assets/f4f9fa04-a580-4d7a-8e74-dfe8728b2ad6" />
 
 **Database Result**
