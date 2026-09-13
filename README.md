@@ -38,3 +38,9 @@ Each Class have one responsibility:
 <img width="1231" height="1292" alt="image" src="https://github.com/user-attachments/assets/8ffe472b-a7bb-4fcc-88e3-db240c2effa9" />
 
 <img width="980" height="657" alt="image" src="https://github.com/user-attachments/assets/f4f9fa04-a580-4d7a-8e74-dfe8728b2ad6" />
+
+Database Result
+
+The screenshot below demonstrates weather data retrieved from the API and successfully loaded to SQL Server.
+<img width="2534" height="912" alt="image" src="https://github.com/user-attachments/assets/c062ff7a-04d7-4752-92c2-4ca71b5c0700" />
+
