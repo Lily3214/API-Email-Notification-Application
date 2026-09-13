@@ -34,10 +34,11 @@ Each Class have one responsibility:
 **API-Email-Notification-Application Flowchart**
 <img width="875" height="1016" alt="image" src="https://github.com/user-attachments/assets/e245266d-c934-45c5-98a8-b973574bf3b1" />
 
+**API-Email-Notification-Application Demo**
 <img width="1233" height="1291" alt="image" src="https://github.com/user-attachments/assets/26425129-4efa-49af-b096-801c3230c306" />
 
 <img width="1231" height="1292" alt="image" src="https://github.com/user-attachments/assets/8ffe472b-a7bb-4fcc-88e3-db240c2effa9" />
-
+**API-Email-Notification-Application Email Notification Received**
 <img width="980" height="657" alt="image" src="https://github.com/user-attachments/assets/f4f9fa04-a580-4d7a-8e74-dfe8728b2ad6" />
 
 **Database Result**
