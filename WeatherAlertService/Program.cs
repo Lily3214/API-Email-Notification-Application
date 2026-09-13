@@ -3,8 +3,25 @@ using WeatherAlertService.Configuration;
 using WeatherAlertService.Services;
 using WeatherAlertService.Models;
 using WeatherAlertService.Templates;
+using WeatherAlertService.Data;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "Logs/weather-log-.txt",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate:
+            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} " +
+            "[{Level:u3}] " +
+            "{SourceContext} - " +
+            "{Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 
 // -------------------------------
@@ -25,7 +42,7 @@ builder.Services.AddHttpClient<WeatherApiClient>(client =>
 builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<EmailService>();
-
+builder.Services.AddScoped<WeatherRepository>();
 
 // -------------------------------
 // Configuration
@@ -65,7 +82,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-
+app.UseSerilogRequestLogging();
 // -------------------------------
 // Weather Endpoint
 // -------------------------------
@@ -184,6 +201,37 @@ app.MapPost(
         });
     })
     .WithName("TestWeatherAlert");
+
+app.MapPost(
+    "/weather/save",
+    async (
+        double latitude,
+        double longitude,
+        WeatherService weatherService,
+        WeatherRepository weatherRepository,
+        CancellationToken cancellationToken) =>
+    {
+        var weather = await weatherService.GetWeatherAsync(
+            latitude,
+            longitude);
+
+        if (weather is null)
+        {
+            return Results.Problem(
+                "Unable to retrieve weather data.");
+        }
+
+        await weatherRepository.SaveAsync(
+            weather,
+            cancellationToken);
+
+        return Results.Ok(new
+        {
+            Message = "Weather data saved successfully.",
+            Weather = weather
+        });
+    })
+    .WithName("SaveWeather");
 /*
 // -------------------------------
 // Email Test Endpoint
