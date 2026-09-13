@@ -1,10 +1,15 @@
+using Serilog;
 using WeatherAlertService.Api;
 using WeatherAlertService.Configuration;
-using WeatherAlertService.Services;
-using WeatherAlertService.Models;
-using WeatherAlertService.Templates;
 using WeatherAlertService.Data;
-using Serilog;
+using WeatherAlertService.Models;
+using WeatherAlertService.Services;
+using WeatherAlertService.Templates;
+
+
+// ----------------------------------------------------
+// Serilog Configuration
+// ----------------------------------------------------
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -21,32 +26,38 @@ Log.Logger = new LoggerConfiguration()
 
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Host.UseSerilog();
 
 
-// -------------------------------
+// ----------------------------------------------------
 // Services
-// -------------------------------
+// ----------------------------------------------------
 
 builder.Services.AddRazorPages();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+// Open-Meteo API client
 builder.Services.AddHttpClient<WeatherApiClient>(client =>
 {
     client.BaseAddress =
         new Uri("https://api.open-meteo.com/");
 });
 
+
+// Application services
 builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<WeatherRepository>();
 
-// -------------------------------
+
+// ----------------------------------------------------
 // Configuration
-// -------------------------------
+// ----------------------------------------------------
 
 builder.Services.Configure<AlertSettings>(
     builder.Configuration.GetSection(
@@ -57,16 +68,16 @@ builder.Services.Configure<SmtpSettings>(
         SmtpSettings.SectionName));
 
 
-// -------------------------------
+// ----------------------------------------------------
 // Build Application
-// -------------------------------
+// ----------------------------------------------------
 
 var app = builder.Build();
 
 
-// -------------------------------
+// ----------------------------------------------------
 // Middleware
-// -------------------------------
+// ----------------------------------------------------
 
 if (app.Environment.IsDevelopment())
 {
@@ -80,12 +91,20 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.UseSerilogRequestLogging();
+
 app.MapRazorPages();
 
-app.UseSerilogRequestLogging();
-// -------------------------------
-// Weather Endpoint
-// -------------------------------
+
+// ====================================================
+// WEATHER API ENDPOINT
+// ====================================================
+//
+// Retrieves current weather from Open-Meteo.
+//
+// Example:
+// GET /weather?latitude=38.25&longitude=-85.76
+//
 
 app.MapGet(
     "/weather",
@@ -101,17 +120,27 @@ app.MapGet(
                 longitude,
                 cancellationToken);
 
-        return weather is null
-            ? Results.Problem(
-                "Unable to retrieve weather.")
-            : Results.Ok(weather);
+        if (weather is null)
+        {
+            return Results.Problem(
+                "Unable to retrieve weather data.");
+        }
+
+        return Results.Ok(weather);
     })
     .WithName("GetWeather");
 
 
-// -------------------------------
-// Alert Endpoint
-// -------------------------------
+// ====================================================
+// WEATHER ALERT CHECK ENDPOINT
+// ====================================================
+//
+// Retrieves live weather and evaluates it against
+// configured alert thresholds.
+//
+// Example:
+// GET /alerts/check?latitude=38.25&longitude=-85.76
+//
 
 app.MapGet(
     "/alerts/check",
@@ -131,76 +160,32 @@ app.MapGet(
         if (weather is null)
         {
             return Results.Problem(
-                "Unable to retrieve weather.");
+                "Unable to retrieve weather data.");
         }
 
-        var result =
+        var alertResult =
             alertService.Evaluate(weather);
 
-        return Results.Ok(result);
+        return Results.Ok(
+            new
+            {
+                Weather = weather,
+                Alert = alertResult
+            });
     })
     .WithName("CheckWeatherAlert");
 
-app.MapPost(
-    "alert/test",
-    async (
-        double temperature,
-        double windSpeed,
-        string recipient,
-        AlertService alertService,
-        EmailService emailService,
-        CancellationToken cancellationToken) =>
-    {
-        // Create fake weather data for testing
-        var weather = new WeatherResponse
-        {
-            Latitude = 38.25,
-            Longitude = -85.76,
 
-            Current = new CurrentWeather
-            {
-                Time = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
-                Temperature = temperature,
-                WindSpeed = windSpeed,
-            }
-        };
-
-        // Same business rules used with real weather data.
-        var alertResult = alertService.Evaluate(weather);
-
-        // No alert = don't send email
-        if (!alertResult.IsTriggered)
-        {
-            return Results.Ok(new
-            {
-                AlertTriggered = false,
-                EmailSent = false,
-                alertResult.Message
-            });
-        }
-
-        // build HTML email
-        var htmlBody =
-        EmailTemplate.CreateWeatherAlertTemplate(
-            temperature,
-            windSpeed,
-            alertResult.Message);
-
-        // Send through Mailtrap
-        await emailService.SendAsync(
-            recipient,
-            "Weather Alert",
-            htmlBody,
-            cancellationToken);
-
-        return Results.Ok(new
-        {
-            AlertTriggered = true,
-            EmailSent = true,
-            alertResult.Message
-        });
-    })
-    .WithName("TestWeatherAlert");
+// ====================================================
+// SAVE WEATHER TO SQL SERVER
+// ====================================================
+//
+// Retrieves live weather from Open-Meteo and saves
+// the result to SQL Server.
+//
+// Example:
+// POST /weather/save?latitude=38.25&longitude=-85.76
+//
 
 app.MapPost(
     "/weather/save",
@@ -211,9 +196,11 @@ app.MapPost(
         WeatherRepository weatherRepository,
         CancellationToken cancellationToken) =>
     {
-        var weather = await weatherService.GetWeatherAsync(
-            latitude,
-            longitude);
+        var weather =
+            await weatherService.GetWeatherAsync(
+                latitude,
+                longitude,
+                cancellationToken);
 
         if (weather is null)
         {
@@ -225,58 +212,122 @@ app.MapPost(
             weather,
             cancellationToken);
 
-        return Results.Ok(new
-        {
-            Message = "Weather data saved successfully.",
-            Weather = weather
-        });
+        return Results.Ok(
+            new
+            {
+                Message =
+                    "Weather data saved successfully.",
+                Weather = weather
+            });
     })
     .WithName("SaveWeather");
-/*
-// -------------------------------
-// Email Test Endpoint
-// -------------------------------
+
+
+// ====================================================
+// DEMO WEATHER ALERT ENDPOINT
+// ====================================================
+//
+// One-click Swagger demo.
+//
+// Uses static weather values so the application
+// reliably triggers an alert and sends an email
+// through Mailtrap.
+//
+// No request parameters are required.
+//
 
 app.MapPost(
-    "/email/test",
+    "/alerts/test",
     async (
-        string recipient,
+        AlertService alertService,
         EmailService emailService,
         CancellationToken cancellationToken) =>
     {
-        const string subject =
-            "WeatherAlertService Test";
+        // Static demo values
+        const double temperature = 105.0;
+        const double windSpeed = 10.0;
 
-        const string body = """
-            <html>
-            <body>
-                <h2>Weather Alert Service</h2>
+        // Mailtrap Sandbox captures this email.
+        // It is not delivered to this address.
+        const string recipient = "demo@example.com";
 
-                <p>
-                    SMTP integration is working.
-                </p>
 
-                <hr />
+        var weather = new WeatherResponse
+        {
+            Latitude = 38.25,
+            Longitude = -85.76,
 
-                <small>
-                    WeatherAlertService Portfolio Project
-                </small>
-            </body>
-            </html>
-            """;
+            Current = new CurrentWeather
+            {
+                Time =
+                    DateTime.Now.ToString(
+                        "yyyy-MM-dd HH:mm"),
 
+                Temperature = temperature,
+                WindSpeed = windSpeed
+            }
+        };
+
+
+        // Apply the same business rules used
+        // by live weather data.
+        var alertResult =
+            alertService.Evaluate(weather);
+
+
+        // If thresholds are not exceeded,
+        // no email is sent.
+        if (!alertResult.IsTriggered)
+        {
+            return Results.Ok(
+                new
+                {
+                    AlertTriggered = false,
+                    EmailSent = false,
+
+                    Temperature = temperature,
+                    WindSpeed = windSpeed,
+
+                    alertResult.Message
+                });
+        }
+
+
+        // Generate HTML email body
+        var htmlBody =
+            EmailTemplate.CreateWeatherAlertTemplate(
+                temperature,
+                windSpeed,
+                alertResult.Message);
+
+
+        // Send email through SMTP / Mailtrap
         await emailService.SendAsync(
             recipient,
-            subject,
-            body,
+            "Weather Alert - Demo",
+            htmlBody,
             cancellationToken);
 
-        return Results.Ok(new
-        {
-            Message = "Test email sent successfully."
-        });
+
+        return Results.Ok(
+            new
+            {
+                AlertTriggered = true,
+                EmailSent = true,
+
+                Temperature = temperature,
+                WindSpeed = windSpeed,
+
+                Recipient = recipient,
+
+                alertResult.Message
+            });
     })
-    .WithName("SendTestEmail");
-*/
+    .WithName("TriggerDemoWeatherAlert");
+
+
+// ----------------------------------------------------
+// Run Application
+// ----------------------------------------------------
 
 app.Run();
